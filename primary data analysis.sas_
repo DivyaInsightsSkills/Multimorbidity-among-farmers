@@ -1,0 +1,537 @@
+6options validvarname=v7;
+
+proc import datafile="/home/u64465901/PRIMARY DATA.xlsx"
+    out=farmers
+    dbms=xlsx
+    replace;
+    getnames=yes;
+run;
+
+proc contents data=farmers varnum;
+run;
+
+proc means data=farmers n nmiss;
+run;
+proc freq data=farmers;
+tables _character_ / missing;
+run;
+
+ods _all_ close;
+ods graphics on;
+
+ods pdf file="/home/u64465901/result.pdf"
+style=journal
+startpage=yes;
+
+proc means data=farmers
+n
+mean
+std
+median
+min
+q1
+q3
+max
+maxdec=2;
+
+var
+Age
+Height
+Weight
+BMI
+Household_Size
+Household_Income
+Years_in_Farming
+Months_Farm_Work
+Landholding
+Years_pesticide_handling
+regular_medicines_count
+Number_of_visits
+Number_of_admissions
+Consultation_Fees
+Investigations_Tests
+Medicines
+Transport
+Other_Expenses
+Total_expenses;
+
+run;
+
+proc freq data=farmers;
+
+tables
+
+Sex
+Marital_Status
+Education_Level
+Family_type
+SES
+Primary_Occupation
+BMI_CODE
+Tobacco_Use
+Alcohol_Use
+Physical_Activity
+Hypertension
+Diabetes_Mellitus
+Heart_Disease
+Stroke
+COPD_Asthma
+Arthritis
+Kidney_Disease
+Cancer
+Depression
+Thyroid
+Back_Pain
+Liver_Disease
+Multimorbidity
+Hospital_Admission
+Insurance_Coverage
+Receive_reimbursement
+Coping_Mechanisms
+
+/missing;
+
+run;
+
+proc sgplot data=farmers;
+vbar Sex / datalabel;
+title "Distribution of Sex";
+run;
+
+proc sgplot data=farmers;
+vbar Marital_Status / datalabel;
+title "Marital Status";
+run;
+
+proc sgplot data=farmers;
+vbar Education_Level / datalabel;
+title "Education Level";
+run;
+
+proc sgplot data=farmers;
+vbar SES / datalabel;
+title "Socioeconomic Status";
+run;
+
+proc sgplot data=farmers;
+vbar BMI_CODE / datalabel;
+title "BMI Categories";
+run;
+
+proc sgplot data=farmers;
+vbar Handle_pesticides / datalabel;
+title "Pesticides handling";
+run;
+
+proc sgplot data=farmers;
+vbar Frequency_of_pesticide / datalabel;
+title "Frequency of pesticides using";
+run;
+
+proc sgplot data=farmers;
+vbar Protection_used / datalabel;
+title "Protection used";
+run;
+
+proc sgplot data=farmers;
+vbar Tobacco_Use / datalabel;
+title "Tobacco Use";
+run;
+
+proc sgplot data=farmers;
+vbar Alcohol_Use / datalabel;
+title "Alcohol Use";
+run;
+
+proc sgplot data=farmers;
+vbar Physical_Activity / datalabel;
+title "Physical Activity";
+run;
+
+proc sgplot data=farmers;
+vbar Eat_fruits_vegetables / datalabel;
+title "Eating fruits and vegetables";
+run;
+
+proc sgplot data=farmers;
+vbar Hypertension / datalabel;
+title "Hypertension";
+run;
+
+proc sgplot data=farmers;
+vbar Diabetes_Mellitus / datalabel;
+title "Diabetes Mellitus";
+run;
+
+proc sgplot data=farmers;
+vbar Heart_Disease / datalabel;
+title "Heart Disease";
+run;
+
+proc sgplot data=farmers;
+vbar Stroke / datalabel;
+title "Stroke";
+run;
+
+proc sgplot data=farmers;
+vbar COPD_Asthma / datalabel;
+title "COPD Asthma";
+run;
+
+proc sgplot data=farmers;
+vbar Arthritis / datalabel;
+title "Arthritis";
+run;
+
+proc sgplot data=farmers;
+vbar Kidney_Disease / datalabel;
+title "Kidney Disease";
+run;
+
+proc sgplot data=farmers;
+vbar Cancer / datalabel;
+title "Cancer";
+run;
+
+proc sgplot data=farmers;
+vbar Depression / datalabel;
+title "Depression";
+run;
+
+proc sgplot data=farmers;
+vbar Thyroid  / datalabel;
+title "Thyroid";
+run;
+
+proc sgplot data=farmers;
+vbar Back_Pain / datalabel;
+title "Back Pain";
+run;
+
+proc sgplot data=farmers;
+vbar Liver_Disease  / datalabel;
+title "Liver Disease";
+run;
+
+proc sgplot data=farmers;
+vbar Multimorbidity / datalabel;
+title "Prevalence of Multimorbidity";
+run;
+
+proc sgplot data=farmers;
+vbar Taking_Regular_medicines / datalabel;
+title "Taking Regular medicines";
+run;
+
+proc sgplot data=farmers;
+vbar Go_most_often / datalabel;
+title "Going most often facility";
+run;
+
+proc sgplot data=farmers;
+vbar Coping_Mechanisms / datalabel;
+title "Coping Mechanisms";
+run;
+
+/* Normality Checks */
+
+proc univariate data=farmers normal;
+
+var
+Age
+Height
+Weight
+BMI
+Household_Size
+Household_Income
+Years_in_Farming
+Months_Farm_Work
+Landholding
+Years_pesticide_handling
+regular_medicines_count
+Number_of_visits
+Number_of_admissions
+Consultation_Fees
+Investigations_Tests
+Medicines
+Transport
+Other_Expenses
+Total_expenses;
+
+run;
+
+proc univariate data=farmers normal;
+
+var
+Age
+BMI
+Household_Income
+Landholding
+Total_expenses;
+
+histogram / normal;
+qqplot / normal(mu=est sigma=est);
+
+run;
+
+proc logistic data=farmers descending;
+
+class
+Sex(ref='Female')
+Marital_Status(ref=first)
+Education_Level(ref=first)
+Family_type(ref=first)
+Tobacco_Use(ref=first)
+Alcohol_Use(ref=first)
+Physical_Activity(ref=first)
+Handle_pesticides(ref=first)
+Frequency_of_pesticide(ref=first)
+Protection_used(ref=first)
+/ param=ref;
+
+model Multimorbidity(event='Yes') =
+
+Age
+Sex
+Marital_Status
+Education_Level
+Household_Income
+BMI
+Tobacco_Use
+Alcohol_Use
+Physical_Activity
+Years_in_Farming
+Landholding
+Handle_pesticides
+Years_pesticide_handling
+Frequency_of_pesticide
+Protection_used
+
+/clodds=wald
+expb
+lackfit
+rsquare
+ctable;
+run;
+
+proc reg data=farmers;
+
+model Age=
+BMI
+Household_Income
+Years_in_Farming
+Landholding
+Years_pesticide_handling;
+
+run;
+quit;
+
+proc logistic data=farmers plots=roc;
+
+class
+Sex
+Marital_Status
+Education_Level
+Tobacco_Use
+Alcohol_Use
+Physical_Activity
+Handle_pesticides
+Frequency_of_pesticide
+Protection_used
+/ param=ref;
+
+model Multimorbidity(event='Yes') =
+Age
+BMI
+Household_Income
+Years_in_Farming
+Landholding
+Years_pesticide_handling
+Sex
+Marital_Status
+Education_Level
+Tobacco_Use
+Alcohol_Use
+Physical_Activity
+Handle_pesticides
+Frequency_of_pesticide
+Protection_used;
+
+run;
+
+proc freq data=farmers;
+
+tables Multimorbidity*Taking_Regular_medicines / chisq;
+tables Multimorbidity*Go_most_often / chisq;
+tables Multimorbidity*Avoid_seeing_doctor / chisq;
+tables Multimorbidity*Hospital_Admission / chisq;
+tables Multimorbidity*Insurance_Coverage / chisq;
+tables Multimorbidity*Receive_reimbursement / chisq;
+tables Multimorbidity*Coping_Mechanisms / chisq;
+tables Multimorbidity*Distance_to_facility / chisq;
+run;
+
+proc npar1way data=farmers wilcoxon;
+
+class Multimorbidity;
+
+var
+Number_of_visits
+regular_medicines_count
+Number_of_admissions;
+
+run;
+
+proc npar1way data=farmers wilcoxon;
+
+class Multimorbidity;
+
+var
+
+Consultation_Fees
+Investigations_Tests
+Medicines
+Transport
+Other_Expenses
+Total_expenses;
+
+run;
+
+proc means data=farmers
+median
+q1
+q3
+min
+max
+maxdec=2;
+
+class Multimorbidity;
+
+var
+
+Consultation_Fees
+Investigations_Tests
+Medicines
+Transport
+Other_Expenses
+Total_expenses;
+
+run;
+
+proc sgplot data=farmers;
+
+vbox Total_expenses /
+category=Multimorbidity;
+
+xaxis label="Multimorbidity";
+
+yaxis label="Total Out-of-pocket Expenditure";
+
+run;
+
+proc sgplot data=farmers;
+
+vbar Go_most_often /
+    group=Multimorbidity
+    groupdisplay=cluster
+    stat=percent
+    datalabel;
+
+yaxis label="Percentage";
+xaxis label="Most Frequently Visited Health Facility";
+
+run;
+
+proc sgplot data=farmers;
+
+vbar Hospital_Admission /
+    group=Multimorbidity
+    groupdisplay=cluster
+    stat=percent
+    datalabel;
+
+yaxis label="Percentage";
+xaxis label="Hospital admission";
+
+run;
+
+proc sgplot data=farmers;
+
+vbar Insurance_Coverage /
+    group=Multimorbidity
+    groupdisplay=cluster
+    stat=percent
+    datalabel;
+
+yaxis label="Percentage";
+xaxis label="Insurance coverage";
+
+run;
+
+proc sgplot data=farmers;
+
+vbar Taking_Regular_medicines /
+    group=Multimorbidity
+    groupdisplay=cluster
+    stat=percent
+    datalabel;
+
+yaxis label="Percentage";
+xaxis label="Taking regular medicines";
+
+run;
+
+proc corr data=farmers spearman plots=matrix(histogram);
+
+var
+Age
+BMI
+Household_Income
+Years_in_Farming
+Landholding
+Years_pesticide_handling
+Number_of_visits
+Total_expenses;
+
+run;
+
+proc logistic data=farmers descending;
+
+class
+Sex
+Education_Level
+Physical_Activity
+/ref=first;
+
+model Multimorbidity =
+Age
+BMI
+Physical_Activity;
+
+output out=PredData
+pred=PredictedProbability;
+
+run;
+
+proc contents data=PredData;
+run;
+
+data PredData;
+set PredData;
+
+length Prediction $10;
+
+if PredictedProbability >= 0.5 then Prediction="High Risk";
+else Prediction="Low Risk";
+
+run;
+
+proc freq data=PredData;
+tables Prediction*Multimorbidity;
+run;
+
+ods pdf close;
+
+ods graphics off;
+
+ods listing;
